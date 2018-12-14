@@ -1,6 +1,10 @@
 import ReactReconciler, { Update } from "react-reconciler";
-import { Instance, TextInstance, TextInputInstance, ButtonInstance } from "./instance";
-import Container from "./container";
+//import { Instance, TextInstance, TextInputInstance, ButtonInstance } from "./instance";
+//import Container from "./container";
+// @ts-ignore
+//const wasm = require("./cpp_with_emscripten_val.js");
+const wasm = require("../reacten.js").default;
+//https://github.com/snowcoders/boilerplate-emscripten-typescript
 
 const rootHostContext = {};
 const childHostContext = {};
@@ -25,6 +29,21 @@ type Props = { [key: string]: any };
 type Type = string; // number;
 
 type Deadline = number;
+
+type Instance = number;
+
+type Container = number;
+
+type TextInstance = number;
+
+
+enum Components {
+    UNKNOWN = 0,
+    Text,
+    TextInput,
+    Button
+}
+
 
 const hostConfig: ReactReconciler.HostConfig<
   Type,
@@ -80,12 +99,13 @@ const hostConfig: ReactReconciler.HostConfig<
             }
         });
 
+
         if (type === 'textinput') {
-            return new TextInputInstance(type, props);
+            return wasm._createInstance(Components.TextInput);
         } else if (type === 'button') {
-            return new ButtonInstance(type, props);
+            return wasm._createInstance(Components.Button);
         }
-        return new Instance(type, props);
+        return wasm._createInstance(Components.UNKNOWN);
     },
     getPublicInstance: (instance: Instance | TextInstance) => {
         return new PublicInstance();
@@ -107,7 +127,7 @@ const hostConfig: ReactReconciler.HostConfig<
         hostContext: HostContext,
         internalInstanceHandle: OpaqueHandle
     ) => {
-        return new TextInstance(text);
+        return wasm._createInstance(Components.Text);
     },
     commitMount: (
         instance: Instance,
@@ -116,10 +136,10 @@ const hostConfig: ReactReconciler.HostConfig<
         internalInstanceHandle: OpaqueHandle
     ) => {},
     appendInitialChild: (parent: Instance, child: Instance | TextInstance) => {
-        parent.appendChild(child);
+        return wasm._appendChild(parent, child);
     },
     appendChild(parent: Instance, child: Instance | TextInstance) {
-        parent.appendChild(child);
+        return wasm._appendChild(parent, child);
     },
     finalizeInitialChildren: (
         parentInstance: Instance,
@@ -128,7 +148,7 @@ const hostConfig: ReactReconciler.HostConfig<
         rootContainerInstance: Container,
         hostContext: HostContext
     ) => {
-        rootContainerInstance.updateLayout();
+        //rootContainerInstance.updateLayout();
         return true;
     },
     supportsMutation: true,
@@ -139,7 +159,7 @@ const hostConfig: ReactReconciler.HostConfig<
         container: Container,
         child: Instance | TextInstance
     ) => {
-        container.appendChild(child);
+        wasm._containerAppendChild(child);
     },
     prepareUpdate(
         instance: Instance,
@@ -149,11 +169,7 @@ const hostConfig: ReactReconciler.HostConfig<
         rootContainerInstance: Container,
         hostContext: HostContext
     ) {
-        if (instance.updateProps(newProps)) {
-      
-        }
-
-        rootContainerInstance.updateLayout();
+        wasm._updateProps(instance, );
         return true;
     },
     commitUpdate(
@@ -175,8 +191,10 @@ export default {
     domElement: any,
     callback: () => void | null | undefined
   ) => {
+    
+    console.log(wasm);
     // Create a root Container if it doesnt exist
-    const container = new Container();
+    const container = 0;
     if (!domElement._rootContainer) {
       domElement._rootContainer = ReactReconcilerInst.createContainer(
         container,
@@ -188,10 +206,18 @@ export default {
     canvas.width = 800;
     canvas.height = 600;
 
-    canvas.onclick = container.onClick;
-    canvas.onscroll = container.onScroll;
-    canvas.onwheel = container.onWheel;
-    document.onkeypress = container.onKeyPress;
+    console.log(canvas);
+
+    canvas.onclick = () => {
+        wasm._onClick();
+    }
+    canvas.onscroll = () => {
+        wasm._onScroll();
+    }
+    canvas.onwheel = () => {
+        //wasm._onWheel();
+    }
+    //document.onkeypress = container.onKeyPress;
     context = canvas.getContext("2d");
     domElement.appendChild(canvas);
     const step = () => {
@@ -199,12 +225,17 @@ export default {
         return 0;
       }
 
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      container.render(context);
+      //context.clearRect(0, 0, canvas.width, canvas.height);
+      wasm._render();
 
-      window.requestAnimationFrame(step);
+      //window.requestAnimationFrame(step);
       //window.setTimeout(step, 1000);
     };
+
+
+    //wasm['run']().then(WasmModule => {
+    //    WasmModule._createInstance(3);
+    //});
 
     window.requestAnimationFrame(step);
 

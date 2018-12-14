@@ -30,9 +30,9 @@ class App extends Component<{}, State> {
     componentDidMount( ) {
         const step = () => {
             this.setState({height: this.state.height + 1});
-            window.setTimeout(step, 1000);
+            //window.setTimeout(step, 1000);
         };
-        window.setTimeout(step, 10);
+        //window.setTimeout(step, 10);
     }
 }
 

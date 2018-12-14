@@ -11,6 +11,10 @@
 # production
 /build
 
+/native/CMakeFiles
+/native/CMakeCache.txt
+/native/cmake_install.cmake
+
 # misc
 .DS_Store
 .env.local
@@ -21,3 +25,9 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+src/reacten.wasm
+src/reacten.js
+src/reacten.data
+public/reacten.wasm
+yarn.lock
+package-lock.json
