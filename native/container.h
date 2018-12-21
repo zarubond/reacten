@@ -13,11 +13,14 @@ public:
     {
         YGNodeInsertChild(root, component->node(), children.size());
         children.push_back(component);
+        resize(800, 600);
     }
 
     void render()
     {
-        canvas.clearRect(0, 0, YGNodeLayoutGetWidth(root), YGNodeLayoutGetHeight(root));
+        resize(800, 600);
+        canvas.clearRect(YGNodeLayoutGetLeft(root), YGNodeLayoutGetTop(root), YGNodeLayoutGetWidth(root), YGNodeLayoutGetHeight(root));
+        printf("component: %f %f %f %f\n", YGNodeLayoutGetLeft(root), YGNodeLayoutGetTop(root), YGNodeLayoutGetWidth(root), YGNodeLayoutGetHeight(root));
         for (Component *child: children) {
             child->render(canvas);
         }
@@ -33,9 +36,10 @@ public:
 
     void resize(float width, float height) 
     {
-        YGNodeStyleSetWidth(root, width);
-        YGNodeStyleSetHeight(root, height);
-        YGNodeCalculateLayout(root, width, height, YGDirectionLTR);
+        //YGNodeStyleSetWidth(root, width);
+        //YGNodeStyleSetHeight(root, height);
+        YGNodeCalculateLayout(root, width, height, YGDirection::YGDirectionLTR);
+        YGNodePrint(root, YGPrintOptionsChildren);
     }
 
     void onClick(float x, float y) {

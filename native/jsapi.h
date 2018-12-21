@@ -7,6 +7,7 @@
 
 enum class Components: int {
     UNKNOWN = 0,
+    View,
     Text,
     TextInput,
     Button
@@ -33,8 +34,11 @@ extern "C" {
         case Components::TextInput:
             child = new TextInput;
             break;
+        case Components::View:
+            child = new Component;
+        default:
+            child = new Component;
         }
-
         return child;
     }
 
@@ -48,24 +52,29 @@ extern "C" {
         container.appendChild(child);
     }
 
-    void updateProps(Component *component, float width, float height, float top, float bottom, float right, float left, int zIndex) {
+    EMSCRIPTEN_KEEPALIVE
+    void updateProps(Component *component, float width, float height, float top, float bottom, float right, float left, int zIndex, 
+        unsigned char bgR, unsigned char bgG, unsigned char bgB, float borderWidth, 
+        unsigned char brR, unsigned char brG, unsigned char brB) {
         Props props;
-
-        props.width = width;
-        props.height = height;
-        props.top = top;
-        props.bottom = bottom;
-        props.right = right;
-        props.left = left;
+        printf("%f %f %f %f\n", width, height, top, bottom);
+        props.width = isnan(width) ? YGUndefined : width;
+        props.height = isnan(height) ? YGUndefined : height;
+        props.top = isnan(top) ? YGUndefined : top;
+        props.bottom = isnan(bottom) ? YGUndefined : bottom;
+        props.right = isnan(right) ? YGUndefined : right;
+        props.left = isnan(left) ? YGUndefined : left;
         props.zIndex = INT_MIN;
-    //int borderWidth = INT_MIN;
-    //int borderColor = INT_MIN;
+        props.borderWidth = borderWidth;
+        props.borderColor = Color(brR, brG, brB);
+        props.backgroundColor = Color(bgR, bgG, bgB);
 
         component->updateProps(props);
     }
 
     EMSCRIPTEN_KEEPALIVE
     void render() {
+        printf("render\n");
         container.render();
     }
 

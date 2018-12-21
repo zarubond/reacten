@@ -10,10 +10,10 @@ export interface FlexBoxStyle {
     zIndex?: number;
     borderWidth?: number;
     borderColor?: string;
+    backgroundColor?: string;
 }
 
 export interface Style extends FlexBoxStyle {
-    backgroundColor?: string;
     opacity?: number;
 }
 

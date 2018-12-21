@@ -18,8 +18,8 @@ struct Props
 
     int zIndex = INT_MIN;
     int borderWidth = INT_MIN;
-    int borderColor = INT_MIN;
-    int backgroundColor = INT_MIN;
+    Color borderColor = Color(0,0,0,0);
+    Color backgroundColor = Color(0,0,0,0);
 
     bool onClick = false;
 };
@@ -39,13 +39,14 @@ public:
 
     void updateProps(const Props &props)
     {
+        printf("props: t:%f b:%f r:%f l:%f w:%f h:%f\n", props.top, props.bottom, props.right, props.left, props.width, props.height);
         YGNodeStyleSetWidth(_node, props.width);
         YGNodeStyleSetHeight(_node, props.height);
         YGNodeStyleSetPosition(_node, YGEdge::YGEdgeRight, props.right);
         YGNodeStyleSetPosition(_node, YGEdge::YGEdgeLeft, props.left);
         YGNodeStyleSetPosition(_node, YGEdge::YGEdgeTop, props.top);
         YGNodeStyleSetPosition(_node, YGEdge::YGEdgeBottom, props.bottom);
-        this->props = props;
+        memcpy(&(this->props), &props, sizeof(this->props));
     }
 
     void appendChild(Component *component) 
@@ -56,6 +57,7 @@ public:
 
     virtual void render(Canvas &canvas)
     {
+        //printf("%f %f %f %f\n", YGNodeLayoutGetLeft(_node), YGNodeLayoutGetTop(_node), YGNodeLayoutGetWidth(_node), YGNodeLayoutGetHeight(_node));
         renderRect(canvas);
         for(Component * child: children) {
             child->render(canvas);
@@ -83,8 +85,19 @@ public:
 
 protected:
     void renderRect(Canvas &canvas) {
-        canvas.setLineWidth(10);
-        canvas.fillRect(0, 0, 800, 600);
+        
+        if (props.borderWidth > 0) {
+            canvas.setLineWidth(props.borderWidth);
+        }
+    	float w = YGNodeLayoutGetWidth(_node);
+        float h = YGNodeLayoutGetHeight(_node);
+        
+        printf("%f %f %f %f \n", YGNodeLayoutGetLeft(_node), YGNodeLayoutGetRight(_node), w, h);
+        printf("%d %d %d %d \n", int(props.backgroundColor.r), int(props.backgroundColor.g), int(props.backgroundColor.b), int(props.backgroundColor.a));
+        if (props.backgroundColor.a > 0 && w != YGUndefined && h != YGUndefined) {
+            canvas.setFillColor(props.backgroundColor);
+            canvas.fillRect(YGNodeLayoutGetLeft(_node), YGNodeLayoutGetRight(_node), 50, 50);//YGNodeLayoutGetWidth(_node), YGNodeLayoutGetHeight(_node));
+        }
     }
 
 private:
